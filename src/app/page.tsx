@@ -1,64 +1,86 @@
-import Image from "next/image";
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { db } from '@/lib/db';
+import Link from 'next/link';
+import { Clock, Plus, FilePlus } from 'lucide-react';
+import CreateNoteButton from '@/components/CreateNoteButton';
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect('/sign-in');
+  }
+
+  const notes = db
+    .prepare(
+      'SELECT id, title, updated_at FROM notes WHERE user_id = ? ORDER BY updated_at DESC',
+    )
+    .all(session.user.id) as {
+    id: string;
+    title?: string;
+    updated_at: number;
+  }[];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="min-h-screen bg-background text-foreground font-[family-name:var(--font-inter)] selection:bg-primary/20">
+      <main className="max-w-6xl mx-auto p-6 md:p-8 space-y-10">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-6 border-b border-border/50">
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-violet-600 bg-clip-text text-transparent pb-1">
+              My Notes
+            </h1>
+            <p className="text-muted-foreground mt-2 text-lg">
+              Good day, {session.user.name}
+            </p>
+          </div>
+          <CreateNoteButton />
+        </header>
+
+        {notes.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-32 text-center border-2 border-dashed border-border/50 rounded-3xl bg-card/30">
+            <div className="p-5 bg-muted/30 rounded-full mb-6 text-primary/60">
+              <FilePlus size={56} strokeWidth={1.5} />
+            </div>
+            <h3 className="text-2xl font-semibold mb-3">No notes found</h3>
+            <p className="text-muted-foreground max-w-sm mx-auto mb-8 text-lg">
+              Your thoughts are safe here. Start capturing your ideas.
+            </p>
+            <CreateNoteButton />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {notes.map((note) => (
+              <Link
+                key={note.id}
+                href={`/notes/${note.id}`}
+                className="group relative flex flex-col p-6 h-52 rounded-2xl border border-border bg-card hover:bg-card/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 overflow-hidden"
+              >
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/50 to-violet-500/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                <h3 className="text-xl font-bold mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+                  {note.title || 'Untitled Note'}
+                </h3>
+
+                <div className="mt-auto pt-4 border-t border-border/30 flex items-center justify-between text-xs text-muted-foreground group-hover:text-foreground/80 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Clock size={12} />
+                    <span>
+                      {new Date(note.updated_at).toLocaleDateString(undefined, {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
