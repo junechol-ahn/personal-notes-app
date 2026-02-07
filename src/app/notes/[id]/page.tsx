@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
-import { db } from '@/lib/db';
+import { client } from '@/lib/db';
 import NoteEditor from '@/components/NoteEditor';
 
 export default async function NotePage({
@@ -18,20 +18,21 @@ export default async function NotePage({
     redirect('/sign-in');
   }
 
-  const note = db
-    .prepare('SELECT * FROM notes WHERE id = ? AND user_id = ?')
-    .get(id, session.user.id) as
-    | {
-        id: string;
-        content: string;
-        title?: string;
-        is_public: number;
-      }
-    | undefined;
+  const rs = await client.execute({
+    sql: 'SELECT * FROM notes WHERE id = ? AND user_id = ?',
+    args: [id, session.user.id],
+  });
 
-  if (!note) {
+  if (rs.rows.length === 0) {
     notFound();
   }
+
+  const note = rs.rows[0] as unknown as {
+    id: string;
+    content: string;
+    title?: string;
+    is_public: number;
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground font-[family-name:var(--font-inter)] selection:bg-primary/20">

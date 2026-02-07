@@ -1,4 +1,4 @@
-import { db } from '@/lib/db';
+import { client } from '@/lib/db';
 import { notFound } from 'next/navigation';
 import TipTapEditor from '@/components/Editor';
 
@@ -11,19 +11,20 @@ export default async function PublicNotePage({
 }) {
   const { id } = await params;
 
-  const note = db
-    .prepare('SELECT * FROM notes WHERE id = ? AND is_public = 1')
-    .get(id) as
-    | {
-        id: string;
-        content: string;
-        title?: string;
-      }
-    | undefined;
+  const rs = await client.execute({
+    sql: 'SELECT * FROM notes WHERE id = ? AND is_public = 1',
+    args: [id],
+  });
 
-  if (!note) {
+  if (rs.rows.length === 0) {
     notFound();
   }
+
+  const note = rs.rows[0] as unknown as {
+    id: string;
+    content: string;
+    title?: string;
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground font-[family-name:var(--font-inter)] selection:bg-primary/20 p-6 md:p-12">

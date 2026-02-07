@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { db } from '@/lib/db';
+import { client } from '@/lib/db';
 import Link from 'next/link';
 import { Clock, Plus, FilePlus } from 'lucide-react';
 import CreateNoteButton from '@/components/CreateNoteButton';
@@ -15,11 +15,12 @@ export default async function Home() {
     redirect('/sign-in');
   }
 
-  const notes = db
-    .prepare(
-      'SELECT id, title, updated_at FROM notes WHERE user_id = ? ORDER BY updated_at DESC',
-    )
-    .all(session.user.id) as {
+  const rs = await client.execute({
+    sql: 'SELECT id, title, updated_at FROM notes WHERE user_id = ? ORDER BY updated_at DESC',
+    args: [session.user.id],
+  });
+
+  const notes = rs.rows as unknown as {
     id: string;
     title?: string;
     updated_at: number;

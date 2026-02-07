@@ -1,4 +1,4 @@
-import { db } from '@/lib/db';
+import { client } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -9,16 +9,15 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  const note = db
-    .prepare(
-      'SELECT title, content, updated_at, created_at FROM notes WHERE id = ? AND is_public = 1',
-    )
-    .get(id);
+  const rs = await client.execute({
+    sql: 'SELECT title, content, updated_at, created_at FROM notes WHERE id = ? AND is_public = 1',
+    args: [id],
+  });
 
-  if (!note)
+  if (rs.rows.length === 0)
     return NextResponse.json(
       { error: 'Not found or private' },
       { status: 404 },
     );
-  return NextResponse.json(note);
+  return NextResponse.json(rs.rows[0]);
 }

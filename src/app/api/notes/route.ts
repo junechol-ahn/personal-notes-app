@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth';
-import { db } from '@/lib/db';
+import { client } from '@/lib/db';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 
@@ -13,23 +13,21 @@ export async function POST(req: Request) {
   const id = crypto.randomUUID();
   const now = Date.now();
 
-  // Default empty content for TipTap
   const content = JSON.stringify({
     type: 'doc',
     content: [
       {
         type: 'paragraph',
-        content: [], // Empty paragraph to start
+        content: [],
       },
     ],
   });
 
-  const stmt = db.prepare(
-    'INSERT INTO notes (id, user_id, title, content, is_public, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-  );
-
   try {
-    stmt.run(id, session.user.id, '', content, 0, now, now);
+    await client.execute({
+      sql: 'INSERT INTO notes (id, user_id, title, content, is_public, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      args: [id, session.user.id, '', content, 0, now, now],
+    });
     return NextResponse.json({ id });
   } catch (err: any) {
     console.error(err);
@@ -47,10 +45,10 @@ export async function GET(req: Request) {
   if (!session)
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const notes = db
-    .prepare(
-      'SELECT id, title, updated_at, created_at FROM notes WHERE user_id = ? ORDER BY updated_at DESC',
-    )
-    .all(session.user.id);
-  return NextResponse.json(notes);
+  const rs = await client.execute({
+    sql: 'SELECT id, title, updated_at, created_at FROM notes WHERE user_id = ? ORDER BY updated_at DESC',
+    args: [session.user.id],
+  });
+
+  return NextResponse.json(rs.rows);
 }

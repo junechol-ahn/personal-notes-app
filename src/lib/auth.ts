@@ -1,11 +1,13 @@
 import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { db } from './db';
 
 export const auth = betterAuth({
-  database: db,
+  database: drizzleAdapter(db, {
+    provider: 'sqlite', // drizzle-orm/sqlite-core
+  }),
   emailAndPassword: {
     enabled: true,
-    autoSignIn: true, // optional
+    autoSignIn: true,
   },
-  // We can specify table names if they differ from default, but defaults match our schema
 });
