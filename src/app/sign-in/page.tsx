@@ -14,6 +14,34 @@ export default function SignIn() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // Check if email exists
+    try {
+      const checkRes = await fetch('/api/auth/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (checkRes.ok) {
+        const { exists } = await checkRes.json();
+        if (!exists) {
+          if (
+            confirm(
+              'This email is not registered. Would you like to create an account?',
+            )
+          ) {
+            router.push(`/sign-up?email=${encodeURIComponent(email)}`);
+          } else {
+            setLoading(false);
+          }
+          return;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to check email', e);
+    }
+
     await signIn.email({
       email,
       password,
