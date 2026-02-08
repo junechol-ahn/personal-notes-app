@@ -41,13 +41,13 @@ function SignUpContent() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-xl glass">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <div className="w-full max-w-md space-y-8 rounded-2xl bg-card p-8 shadow-xl glass border border-border">
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
             Create Account
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm text-gray-600">
             Start writing beautiful notes
           </p>
         </div>
@@ -56,7 +56,7 @@ function SignUpContent() {
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-gray-700"
               >
                 Full Name
               </label>
@@ -68,14 +68,14 @@ function SignUpContent() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm transition-all"
+                className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-primary sm:text-sm transition-all"
                 placeholder="John Doe"
               />
             </div>
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-gray-700"
               >
                 Email address
               </label>
@@ -87,14 +87,14 @@ function SignUpContent() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm transition-all"
+                className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-primary sm:text-sm transition-all"
                 placeholder="you@example.com"
               />
             </div>
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-gray-700"
               >
                 Password
               </label>
@@ -106,7 +106,7 @@ function SignUpContent() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm transition-all"
+                className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-primary sm:text-sm transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -116,18 +116,18 @@ function SignUpContent() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative flex w-full justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 transition-all shadow-md transform hover:scale-[1.02]"
+              className="group relative flex w-full justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-70 transition-all shadow-md transform hover:scale-[1.02]"
             >
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </div>
         </form>
         <div className="text-center text-sm">
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600">
             Already have an account?{' '}
             <Link
               href="/sign-in"
-              className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+              className="font-medium text-primary hover:text-primary/80"
             >
               Sign in
             </Link>
